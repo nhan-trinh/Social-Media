@@ -1,5 +1,6 @@
-import { ArrowLeft, TextIcon } from "lucide-react";
+import { ArrowLeft, Sparkle, TextIcon, Upload } from "lucide-react";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 
 const StoriesModal = ({ setShowModal, fetchStories }) => {
   const bgColor = [
@@ -84,7 +85,7 @@ const StoriesModal = ({ setShowModal, fetchStories }) => {
               setMedia(null);
               setPreviewUrl(null);
             }}
-            className={`flex-1 flex items-center justify-center gap-2 p-2 rounded ${
+            className={`flex-1 flex items-center justify-center gap-2 p-2 rounded cursor-pointer ${
               mode === "text" ? "bg-white text-black" : "bg-zinc-800"
             }`}
           >
@@ -104,8 +105,16 @@ const StoriesModal = ({ setShowModal, fetchStories }) => {
               accept="image/*, video/*"
               className="hidden"
             />
+            <Upload size={18}/> Photo/Video
           </label>
         </div>
+        <button onClick={()=> toast.promise(handleCreatStory(), {
+          loading: 'Saving...',
+          success: <p>Story added</p>,
+          error: e=> <p>{e.massage}</p>
+        })} className="flex items-center justify-center gap-2 text-white py-3 mt-4 w-full rounded bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition cursor-pointer">
+          <Sparkle size={18}/> Create Story
+        </button>
       </div>
     </div>
   );
