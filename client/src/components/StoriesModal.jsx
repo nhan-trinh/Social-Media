@@ -10,6 +10,8 @@ const StoriesModal = ({ setShowModal, fetchStories }) => {
     "#e11d48",
     "#ca8a04",
     "#0d9488",
+    "#000000"
+    
   ];
 
   const [mode, setMode] = useState("text");

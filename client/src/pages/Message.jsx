@@ -24,7 +24,7 @@ const Message = () => {
                 src={user.profile_picture}
                 onClick={()=> navigate(`/profile/${user._id}`)}
                 alt=""
-                className="rounded-full size-12 mx-auto"
+                className="rounded-full size-12 mx-auto cursor-pointer"
               />
               <div className="flex-1">
                 <p className="font-medium text-slate-700">{user.full_name}</p>
