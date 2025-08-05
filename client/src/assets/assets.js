@@ -26,8 +26,8 @@ export const menuItemsData = [
 export const dummyUserData = {
     "_id": "user_2zdFoZib5lNr614LgkONdD8WG32",
     "email": "admin@example.com",
-    "full_name": "NhanTrinh",
-    "username": "nhan_trinh",
+    "full_name": "John Warren",
+    "username": "john_warren",
     "bio": "🌍 Dreamer | 📚 Learner | 🚀 Doer\r\nExploring life one step at a time.\r\n✨ Staying curious. Creating with purpose.",
     "profile_picture": sample_profile,
     "cover_photo": sample_cover,
@@ -42,7 +42,7 @@ export const dummyUserData = {
 }
 
 const dummyUser2Data = {
-    ...dummyUserData,
+    ...dummyUserData,   
     _id: "user_2",
     username: "Richard Hendricks",
     full_name: "Richard Hendricks",
