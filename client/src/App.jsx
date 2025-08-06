@@ -11,6 +11,7 @@ import CreatePost from './pages/CreatePost'
 import {useUser} from "@clerk/clerk-react"
 import Layout from './layout/Layout'
 import {Toaster} from 'react-hot-toast'
+import NotFound from './layout/404NotFound'
 const App = () => {
   const {user} = useUser()
   return (
@@ -26,6 +27,7 @@ const App = () => {
           <Route path='profile' element={<Profile />} />
           <Route path='profile/:profileId' element={<Profile />} />
           <Route path='create-post' element={<CreatePost />} />
+          <Route path='*' element={<NotFound />} />
         </Route>
       </Routes>
     </>
