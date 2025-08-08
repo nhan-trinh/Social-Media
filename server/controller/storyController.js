@@ -1,8 +1,8 @@
 import fs from 'fs'
-import imagekit from '../configs/imagekit';
-import Story from '../models/Story';
-import User from '../models/User';
-import { inngest } from '../inngest';
+import imagekit from '../configs/imagekit.js';
+import Story from '../models/Story.js';
+import User from '../models/User.js';
+import { inngest } from '../inngest/index.js';
 
 
 export const addUserStory = async (req, res) => {
