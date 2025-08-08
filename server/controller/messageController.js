@@ -1,6 +1,6 @@
 import fs from 'fs'
-import imagekit from '../configs/imagekit';
-import Message from '../models/Message';
+import imagekit from '../configs/imagekit.js';
+import Message from '../models/Message.js';
 
 const connections = {};
 
