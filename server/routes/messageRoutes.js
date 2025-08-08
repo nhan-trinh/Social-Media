@@ -1,7 +1,7 @@
 import express from 'express'
-import { getChatMessages, sendMessage, sseController } from '../controller/messageController'
-import { upload } from '../configs/multer'
-import { protect } from '../middleware/auth'
+import { getChatMessages, sendMessage, sseController, } from '../controller/messageController.js'  // Note: controllers (plural) and .js extension
+import { upload } from '../configs/multer.js'
+import { protect } from '../middleware/auth.js'
 
 const messageRouter = express.Router()
 
