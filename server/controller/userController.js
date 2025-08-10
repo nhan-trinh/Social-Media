@@ -110,7 +110,7 @@ export const discoverUsers = async (req, res) => {
             }
         )
         const filteredUser = allUsers.filter(user=> user._id !== userId);
-        res.json({success: true, message: filteredUser})
+        res.json({success: true, users: filteredUser})
 
 
     } catch (error) {
@@ -201,7 +201,7 @@ export const sendConnectionRequest = async (req, res) => {
             return res.json({success: false, message: 'You are already connected with this user'})
         }
 
-        return res.json({success: false, message: 'Connection request pending'})
+        return res.json({success: false, message: 'connections request pending'})
 
 
     } catch (error) {
@@ -214,7 +214,7 @@ export const sendConnectionRequest = async (req, res) => {
 export const getUserConnection = async (req, res) => {
     try {
         const {userId} = req.auth()
-        const user = await User.findById(userId).populate('connection followers following')
+        const user = await User.findById(userId).populate('connections followers following')
 
         const connections = user.connections
         const followers = user.followers
@@ -247,7 +247,7 @@ export const accepteConnectionRequest = async (req, res) => {
 
         const toUser = await User.findById(id)
         toUser.connections.push(userId);
-        await user.save()
+        await toUser.save()
 
         connection.status = 'accepted'
         await connection.save()

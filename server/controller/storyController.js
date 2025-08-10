@@ -34,11 +34,11 @@ export const addUserStory = async (req, res) => {
         data: {storyId: story._id}
     })
 
-    res.json({succes: true})
+    res.json({success: true})
 
   } catch (error) {
     console.log(error)
-    res.json({succes: false, message: error.message})
+    res.json({success: false, message: error.message})
   }
 };
 
@@ -48,12 +48,12 @@ export const getStories = async (req, res) => {
     const user = await User.findById(userId)
     
     const userIds = [userId, ...user.connections, ...user.following]
-    const strories = await Story.find({user: {$in: userIds}}).populate('user').sort
+    const stories = await Story.find({user: {$in: userIds}}).populate('user').sort
     ({createdAt: -1});
      
-    res.json({succes: true, strories})
+    res.json({success: true, stories})
   } catch (error) {
     console.log(error)
-    res.json({succes: false, message: error.message})
+    res.json({success: false, message: error.message})
   }
 }

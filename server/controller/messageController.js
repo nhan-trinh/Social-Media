@@ -4,25 +4,38 @@ import Message from '../models/Message.js';
 
 const connections = {};
 
-
-export const sseController = (req, res) =>{
+export const sseController = (req, res) => {
     const {userId} = req.params
-    console.log('New client connected :' ,userId)
+    console.log('New client connected:', userId)
 
-
-    res.setHeader('Content-Type', 'text/event-stream')
+    // Set CORS headers trước
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    // Set SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.setHeader('Access-Control-Allow-Origin', '*');
     
-    connections[userId] = res
+    // Disable buffering
+    res.flushHeaders();
+    
+    connections[userId] = res;
 
-    res.write('log: Connected to SSE stream\n\n')
+    // Send initial connection message
+    res.write('data: {"type": "connection", "message": "Connected to SSE stream"}\n\n');
 
+    // Handle client disconnect
     req.on('close', () => {
-    delete connections[userId]
-    console.log('Client disconnected');
-  });
+        delete connections[userId];
+        console.log('Client disconnected:', userId);
+    });
+
+    req.on('aborted', () => {
+        delete connections[userId];
+        console.log('Client aborted connection:', userId);
+    });
 }
 
 export const sendMessage = async (req, res) => {
@@ -44,11 +57,12 @@ export const sendMessage = async (req, res) => {
                 path: response.filePath,
                 transformation: [
                     {quality: 'auto'},
-                    {format: 'autowebp'},
+                    {format: 'auto'},
                     {width: '1280'}
                 ]
             })
         }
+        
         const message = await Message.create({
             from_user_id: userId,
             to_user_id,
@@ -56,13 +70,28 @@ export const sendMessage = async (req, res) => {
             message_type,
             media_url
         })
-        res.json({success: true, message})
 
-
+        // Populate message với thông tin user
         const messageWithUserData = await Message.findById(message._id).populate('from_user_id');
 
-        if(connections[to_user_id]){
-            connections[to_user_id].write(`data: ${JSON.stringify(messageWithUserData)}\n\n`)
+        res.json({success: true, message: messageWithUserData})
+
+        // Gửi tin nhắn qua SSE cho người nhận
+        if (connections[to_user_id]) {
+            const sseData = {
+                type: 'new_message',
+                data: messageWithUserData
+            };
+            
+            try {
+                connections[to_user_id].write(`data: ${JSON.stringify(sseData)}\n\n`);
+                console.log('Message sent via SSE to:', to_user_id);
+            } catch (sseError) {
+                console.log('SSE send error:', sseError);
+                delete connections[to_user_id]; // Remove broken connection
+            }
+        } else {
+            console.log('No SSE connection found for user:', to_user_id);
         }
 
     } catch (error) {
@@ -81,7 +110,7 @@ export const getChatMessages = async (req, res) => {
                 {from_user_id: userId, to_user_id},
                 {from_user_id: to_user_id, to_user_id: userId}
             ]
-        }).sort({created_at: -1})
+        }).sort({createdAt: 1})
 
         await Message.updateMany({from_user_id: to_user_id, to_user_id: userId}, {seen: true})
 
@@ -95,7 +124,7 @@ export const getChatMessages = async (req, res) => {
 export const getUserRececentMessages = async (req, res) => {
     try {
         const {userId} = req.auth();
-        const messages = await Message.find({to_user_id: userId}.populate('from_user_id to_user_id')).sort({created_at: -1})
+        const messages = await Message.find({to_user_id: userId}).populate('from_user_id to_user_id').sort({createdAt: -1})
 
         res.json({success: true, messages})
     } catch (error) {
