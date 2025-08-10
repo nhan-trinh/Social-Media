@@ -11,7 +11,6 @@ const Message = () => {
   const navigate = useNavigate()
   const [recentMessages, setRecentMessages] = useState({})
   const [unseenCounts, setUnseenCounts] = useState({})
-  const [sseConnected, setSseConnected] = useState(false)
 
   // Fetch tin nhắn gần đây cho mỗi connection
   const fetchRecentMessages = async () => {
@@ -43,77 +42,6 @@ const Message = () => {
       console.error('Error fetching recent messages:', error)
     }
   }
-
-  // SSE setup với retry logic
-  useEffect(() => {
-    if (!currentUserId) return;
-
-    let eventSource;
-    let retryCount = 0;
-    const maxRetries = 3;
-    
-    const connectSSE = () => {
-      try {
-        // Đảm bảo URL đúng với port backend của bạn
-        eventSource = new EventSource(`http://localhost:4000/api/message/${currentUserId}`);
-        
-        eventSource.onopen = () => {
-          console.log('SSE Connected');
-          setSseConnected(true);
-          retryCount = 0;
-        };
-
-        eventSource.onmessage = (event) => {
-          try {
-            console.log('SSE message received:', event.data);
-            const response = JSON.parse(event.data);
-            
-            if (response.type === 'new_message' && response.data) {
-              const message = response.data;
-              
-              // Cập nhật tin nhắn mới nhất
-              setRecentMessages(prev => ({
-                ...prev,
-                [message.from_user_id]: message
-              }));
-              
-              // Tăng số tin nhắn chưa đọc
-              setUnseenCounts(prev => ({
-                ...prev,
-                [message.from_user_id]: (prev[message.from_user_id] || 0) + 1
-              }));
-            }
-          } catch (parseError) {
-            console.error('Error parsing SSE message:', parseError);
-          }
-        };
-
-        eventSource.onerror = (error) => {
-          console.error('SSE Error:', error);
-          setSseConnected(false);
-          eventSource.close();
-          
-          // Retry connection
-          if (retryCount < maxRetries) {
-            retryCount++;
-            console.log(`Retrying SSE connection... (${retryCount}/${maxRetries})`);
-            setTimeout(connectSSE, 2000 * retryCount);
-          }
-        };
-
-      } catch (error) {
-        console.error('Failed to create SSE connection:', error);
-      }
-    };
-
-    connectSSE();
-
-    return () => {
-      if (eventSource) {
-        eventSource.close();
-      }
-    };
-  }, [currentUserId]);
 
   useEffect(() => {
     if (connections.length > 0) {
@@ -147,9 +75,7 @@ const Message = () => {
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-slate-900 mb-2">Messages</h1>
-            <span className={`inline-block w-3 h-3 rounded-full ${sseConnected ? 'bg-green-500' : 'bg-red-500'}`} 
-                  title={sseConnected ? 'Connected' : 'Disconnected'}>
-            </span>
+            {/* Connection status sẽ được quản lý từ global state */}
           </div>
           <p className="text-slate-600">Talk to your friends and family</p>
         </div>
