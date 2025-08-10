@@ -277,4 +277,3 @@ export const getUserProfiles = async (req, res) => {
         res.json({success: false, message: error.message})
     }
 }
-
