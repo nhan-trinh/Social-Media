@@ -1,46 +1,242 @@
-import React from "react";
-import { dummyConnectionsData } from "../assets/assets";
+import React, { useEffect, useState } from "react";
 import { Eye, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+import { useSelector } from "react-redux";
+import api from "../api/axios";
 
 const Message = () => {
-
+  const {connections} = useSelector((state)=>state.connections)
+  const {getToken, userId: currentUserId} = useAuth()
   const navigate = useNavigate()
+  const [recentMessages, setRecentMessages] = useState({})
+  const [unseenCounts, setUnseenCounts] = useState({})
+  const [sseConnected, setSseConnected] = useState(false)
+
+  // Fetch tin nhắn gần đây cho mỗi connection
+  const fetchRecentMessages = async () => {
+    try {
+      const token = await getToken()
+      const messagesData = {}
+      const unseenData = {}
+
+      for (const connection of connections) {
+        const {data} = await api.post('/api/message/get', 
+          {to_user_id: connection._id}, 
+          {headers: {Authorization: `Bearer ${token}`}}
+        )
+        
+        if (data.success && data.messages.length > 0) {
+          const sortedMessages = data.messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          messagesData[connection._id] = sortedMessages[0]
+          
+          const unseenCount = data.messages.filter(msg => 
+            msg.from_user_id === connection._id && !msg.seen
+          ).length
+          unseenData[connection._id] = unseenCount
+        }
+      }
+      
+      setRecentMessages(messagesData)
+      setUnseenCounts(unseenData)
+    } catch (error) {
+      console.error('Error fetching recent messages:', error)
+    }
+  }
+
+  // SSE setup với retry logic
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    let eventSource;
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    const connectSSE = () => {
+      try {
+        // Đảm bảo URL đúng với port backend của bạn
+        eventSource = new EventSource(`http://localhost:4000/api/message/${currentUserId}`);
+        
+        eventSource.onopen = () => {
+          console.log('SSE Connected');
+          setSseConnected(true);
+          retryCount = 0;
+        };
+
+        eventSource.onmessage = (event) => {
+          try {
+            console.log('SSE message received:', event.data);
+            const response = JSON.parse(event.data);
+            
+            if (response.type === 'new_message' && response.data) {
+              const message = response.data;
+              
+              // Cập nhật tin nhắn mới nhất
+              setRecentMessages(prev => ({
+                ...prev,
+                [message.from_user_id]: message
+              }));
+              
+              // Tăng số tin nhắn chưa đọc
+              setUnseenCounts(prev => ({
+                ...prev,
+                [message.from_user_id]: (prev[message.from_user_id] || 0) + 1
+              }));
+            }
+          } catch (parseError) {
+            console.error('Error parsing SSE message:', parseError);
+          }
+        };
+
+        eventSource.onerror = (error) => {
+          console.error('SSE Error:', error);
+          setSseConnected(false);
+          eventSource.close();
+          
+          // Retry connection
+          if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Retrying SSE connection... (${retryCount}/${maxRetries})`);
+            setTimeout(connectSSE, 2000 * retryCount);
+          }
+        };
+
+      } catch (error) {
+        console.error('Failed to create SSE connection:', error);
+      }
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (connections.length > 0) {
+      fetchRecentMessages()
+    }
+  }, [connections])
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInHours = (now - date) / (1000 * 60 * 60)
+    
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+    } else {
+      return date.toLocaleDateString('vi-VN')
+    }
+  }
+
+  const handleChatClick = (userId) => {
+    setUnseenCounts(prev => ({
+      ...prev,
+      [userId]: 0
+    }))
+    navigate(`/messages/${userId}`)
+  }
+
   return (
     <div className="min-h-screen relative bg-slate-50">
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Messages</h1>
-          <p className="text-slate-600">Talk to your fiends and family</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Messages</h1>
+            <span className={`inline-block w-3 h-3 rounded-full ${sseConnected ? 'bg-green-500' : 'bg-red-500'}`} 
+                  title={sseConnected ? 'Connected' : 'Disconnected'}>
+            </span>
+          </div>
+          <p className="text-slate-600">Talk to your friends and family</p>
         </div>
 
         <div className="flex flex-col gap-3">
-          {dummyConnectionsData.map((user) => (
-            <div
-              key={user._id}
-              className="max-w-xl flex flex-wrap gap-5 p-6 bg-white shadow rounded-md"
-            >
-              <img 
-                src={user.profile_picture}
-                onClick={()=> navigate(`/profile/${user._id}`)}
-                alt=""
-                className="rounded-full size-12 mx-auto cursor-pointer"
-              />
-              <div className="flex-1">
-                <p className="font-medium text-slate-700">{user.full_name}</p>
-                <p className="text-slate-500">@{user.username}</p>
-                <p className="text-sm text-gray-600">{user.bio}</p>
+          {connections.map((user) => {
+            const lastMessage = recentMessages[user._id]
+            const unseenCount = unseenCounts[user._id] || 0
+            
+            return (
+              <div
+                key={user._id}
+                className={`max-w-xl flex flex-wrap gap-5 p-6 bg-white shadow rounded-md cursor-pointer hover:bg-gray-50 transition-colors ${
+                  unseenCount > 0 ? 'border-l-4 border-blue-500' : ''
+                }`}
+                onClick={() => handleChatClick(user._id)}
+              >
+                <div className="relative">
+                  <img 
+                    src={user.profile_picture}
+                    alt=""
+                    className="rounded-full size-12 mx-auto cursor-pointer"
+                  />
+                  {unseenCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center">
+                      {unseenCount > 99 ? '99+' : unseenCount}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className={`font-medium text-slate-700 ${unseenCount > 0 ? 'font-bold' : ''}`}>
+                        {user.full_name}
+                      </p>
+                      <p className="text-slate-500 text-sm">@{user.username}</p>
+                    </div>
+                    {lastMessage && (
+                      <span className="text-xs text-gray-500 whitespace-nowrap">
+                        {formatTime(lastMessage.createdAt)}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {lastMessage ? (
+                    <div className="mt-2">
+                      <p className={`text-sm text-gray-600 truncate ${unseenCount > 0 ? 'font-medium' : ''}`}>
+                        {lastMessage.from_user_id === currentUserId ? 'You: ' : ''}
+                        {lastMessage.message_type === 'image' ? '📷 Image' : lastMessage.text}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400 mt-2">No messages yet</p>
+                  )}
+                </div>
+                
+                <div className="flex flex-col gap-2 mt-4">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleChatClick(user._id)
+                    }} 
+                    className="size-10 flex items-center justify-center text-sm rounded bg-slate-100 hover:bg-slate-200 text-slate-800 active:scale-95 transition cursor-pointer gap-1"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/profile/${user._id}`)
+                    }} 
+                    className="size-10 flex items-center justify-center text-sm rounded bg-slate-100 hover:bg-slate-200 text-slate-800 active:scale-95 transition cursor-pointer"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex flex-col gap-2 mt-4">
-                <button onClick={()=> navigate(`/messages/${user._id}`)} className="size-10 flex items-center justify-center text-sm rounded bg-slate-100 hover:bg-slate-200 text-slate-800 active:scale-95 transition cursor-pointer gap-1">
-                  <MessageSquare className="w-4 h-4" />
-                </button>
-                <button onClick={()=> navigate(`/profile/${user._id}`)} className="size-10 flex items-center justify-center text-sm rounded bg-slate-100 hover:bg-slate-200 text-slate-800 active:scale-95 transition cursor-pointer">
-                  <Eye className="w-4 h-4" />
-                </button>
-              </div>
+            )
+          })}
+          
+          {connections.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No connections yet</p>
+              <p className="text-gray-400">Connect with friends to start messaging</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
