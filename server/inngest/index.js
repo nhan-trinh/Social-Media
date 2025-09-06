@@ -4,6 +4,8 @@ import Connection from "../models/Connections.js";
 import sendEmail from "../configs/nodemailer.js";
 import Story from "../models/Story.js";
 import Message from "../models/Message.js";
+import Comment from "../models/Comment.js";
+import Post from "../models/Post.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "pingup-app" });
@@ -55,7 +57,115 @@ const syncUserDeletion = inngest.createFunction(
   { event: "clerk/user.deleted" },
   async ({ event }) => {
     const { id } = event.data;
-    await User.findByIdAndDelete(id);
+    
+    console.log("=== Starting user deletion process ===");
+    console.log("User ID to delete:", id);
+    
+    try {
+      // Kiểm tra user có tồn tại không trước khi xóa
+      const existingUser = await User.findById(id);
+      if (!existingUser) {
+        console.log("User not found in database, skipping deletion");
+        return { success: true, message: "User not found, already deleted" };
+      }
+      
+      console.log("Found user:", existingUser.username);
+      
+      // 1. Xóa user trước (quan trọng)
+      const deletedUser = await User.findByIdAndDelete(id);
+      console.log("✅ User deleted:", deletedUser ? "Success" : "Failed");
+      
+      // 2. Xóa connections
+      const deletedConnections = await Connection.deleteMany({
+        $or: [{ from_user_id: id }, { to_user_id: id }],
+      });
+      console.log("✅ Connections deleted:", deletedConnections.deletedCount);
+      
+      // 3. Xóa stories
+      const deletedStories = await Story.deleteMany({ user: id });
+      console.log("✅ Stories deleted:", deletedStories.deletedCount);
+      
+      // 4. Xóa messages
+      const deletedMessages = await Message.deleteMany({
+        $or: [{ from_user_id: id }, { to_user_id: id }],
+      });
+      console.log("✅ Messages deleted:", deletedMessages.deletedCount);
+      
+      // 5. Xóa comments
+      const deletedComments = await Comment.deleteMany({ user: id });
+      console.log("✅ Comments deleted:", deletedComments.deletedCount);
+      
+      // 6. Xóa posts
+      const deletedPosts = await Post.deleteMany({ user: id });
+      console.log("✅ Posts deleted:", deletedPosts.deletedCount);
+      
+      // 7. Cleanup references trong user arrays
+      const updatedUsers = await User.updateMany(
+        {
+          $or: [
+            { connections: id },
+            { followers: id },
+            { following: id }
+          ]
+        },
+        {
+          $pull: {
+            connections: id,
+            followers: id,
+            following: id
+          }
+        }
+      );
+      console.log("✅ User references cleaned:", updatedUsers.modifiedCount);
+      
+      // 8. Cleanup likes trong posts
+      const updatedPosts = await Post.updateMany(
+        { likes_count: id },
+        { $pull: { likes_count: id } }
+      );
+      console.log("✅ Post likes cleaned:", updatedPosts.modifiedCount);
+      
+      // 9. Cleanup likes trong comments
+      const updatedComments = await Comment.updateMany(
+        { likes_count: id },
+        { $pull: { likes_count: id } }
+      );
+      console.log("✅ Comment likes cleaned:", updatedComments.modifiedCount);
+      
+      // 10. Cleanup story views
+      const updatedStories = await Story.updateMany(
+        { views_count: id },
+        { $pull: { views_count: id } }
+      );
+      console.log("✅ Story views cleaned:", updatedStories.modifiedCount);
+      
+      console.log("=== User deletion completed successfully ===");
+      
+      return {
+        success: true,
+        message: "User and all related data deleted successfully",
+        userId: id,
+        deletedCounts: {
+          user: deletedUser ? 1 : 0,
+          connections: deletedConnections.deletedCount,
+          stories: deletedStories.deletedCount,
+          messages: deletedMessages.deletedCount,
+          comments: deletedComments.deletedCount,
+          posts: deletedPosts.deletedCount,
+          updatedUsers: updatedUsers.modifiedCount,
+          updatedPosts: updatedPosts.modifiedCount,
+          updatedComments: updatedComments.modifiedCount,
+          updatedStories: updatedStories.modifiedCount
+        }
+      };
+      
+    } catch (error) {
+      console.error("❌ Error in user deletion process:", error);
+      console.error("Stack trace:", error.stack);
+      
+      // QUAN TRỌNG: Throw error để Inngest biết function failed
+      throw new Error(`Failed to delete user ${id}: ${error.message}`);
+    }
   }
 );
 
@@ -108,36 +218,36 @@ const sendNewConnectionRequestReminder = inngest.createFunction(
         subject,
         body,
       });
-      return {message: "Reminder sent"}
+      return { message: "Reminder sent" };
     });
   }
 );
 
 const deleteStory = inngest.createFunction(
-  {id: 'story-delete'},
-  {event: 'app/story.delete'},
-  async ({event, step}) => {
-    const {storyId} = event.data;
-    const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000)
-    await step.sleepUntil("wait-for-24-hours", in24Hours)
+  { id: "story-delete" },
+  { event: "app/story.delete" },
+  async ({ event, step }) => {
+    const { storyId } = event.data;
+    const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await step.sleepUntil("wait-for-24-hours", in24Hours);
     await step.run("delete-story", async () => {
-      await Story.findByIdAndDelete(storyId)
-      return {message: 'Story delete'}
-    })
+      await Story.findByIdAndDelete(storyId);
+      return { message: "Story delete" };
+    });
   }
-)
+);
 
 const sendNotificationOfUnseenMessages = inngest.createFunction(
-  {id: "send-unseen-messages-notification"},
-  {cron: "TZ=America/New_York 0 9 * * *"},
-  async ({step}) => {
-    const messages = await Message.find({seen: false}).populate('to_user_id');
-    const unseenCount = {}
+  { id: "send-unseen-messages-notification" },
+  { cron: "TZ=America/New_York 0 9 * * *" },
+  async ({ step }) => {
+    const messages = await Message.find({ seen: false }).populate("to_user_id");
+    const unseenCount = {};
 
-    messages.map(message=> {
-      unseenCount[message.to_user_id._id] = (unseenCount[message.to_user_id._id] || 0)
-      + 1;
-    })
+    messages.map((message) => {
+      unseenCount[message.to_user_id._id] =
+        (unseenCount[message.to_user_id._id] || 0) + 1;
+    });
     for (const userId in unseenCount) {
       const user = await User.findById(userId);
 
@@ -156,21 +266,19 @@ const sendNotificationOfUnseenMessages = inngest.createFunction(
       await sendEmail({
         to: user.email,
         subject,
-        body
-      })
+        body,
+      });
     }
-    return {message: "Notification sent."}
+    return { message: "Notification sent." };
   }
-)
+);
 
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
-  syncUserCreation, 
-  syncUserUpdation, 
-  syncUserDeletion, 
-  sendNewConnectionRequestReminder,   
+  syncUserCreation,
+  syncUserUpdation,
+  syncUserDeletion,
+  sendNewConnectionRequestReminder,
   deleteStory,
-  sendNotificationOfUnseenMessages
+  sendNotificationOfUnseenMessages,
 ];
-
-
