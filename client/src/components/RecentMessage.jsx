@@ -90,7 +90,7 @@ const RecentMessage = () => {
         <h3 className="font-semibold text-slate-800">Recent Messages</h3>
         <button
           onClick={fetchRecentMessages}
-          className="text-indigo-500 hover:text-indigo-700 text-[10px] opacity-70 hover:opacity-100 transition-opacity"
+          className="text-indigo-500 hover:text-indigo-700 text-[10px] opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
           disabled={loading}
         >
           {loading ? "..." : "↻"}

@@ -30,7 +30,7 @@ const StoriesModal = ({ setShowModal, fetchStories }) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.type.startsWith("video")) {
-        if (file.size > MAX_SIZE_VIDEO_MB * 1024 * 1024) {
+        if (file.size > MAX_SIZE_VIDEO_MB * 1024 * 1024) { 
           toast.error(`Video file size cannot exceed ${MAX_SIZE_VIDEO_MB}MB`);
           setMedia(null);
           setPreviewUrl(null);
@@ -98,7 +98,7 @@ const StoriesModal = ({ setShowModal, fetchStories }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-110 min-h-screen bg-black/30 backdrop:blur text-white flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[110] min-h-screen bg-black/30 backdrop-blur text-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-4 flex items-center justify-between">
           <button

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { dummyPostsData, dummyUserData } from "../assets/assets";
 import Loading from "../components/Loading";
 import UserProfileInfo from "../components/UserProfileInfo";
 import PostCard from "../components/PostCard";
@@ -10,40 +9,61 @@ import { useAuth } from "@clerk/clerk-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+import SkeletonUserProfile from "../components/SkeletonUserProfile";
+import SkeletonPostCard from "../components/SkeletonPostCard";
+import SharePostCard from "../components/SharePostCard";
 
 const Profile = () => {
+  const currentUser = useSelector((state) => state.user.value);
 
-  const currentUser = useSelector((state)=> state.user.value)
-
-  const {getToken} = useAuth()
+  const { getToken } = useAuth();
   const { profileId } = useParams();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [shares, setShares] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
   const [showEdit, setShowEdit] = useState(false);
 
   const fetchUser = async (profileId) => {
-    const token = await getToken()
+    const token = await getToken();
     try {
-      const {data} = await api.post(`/api/user/profiles`, {profileId}, {
-        headers: {Authorization: `Bearer ${token}`}
-      })
-      if(data.success){
+      const { data } = await api.post(
+        `/api/user/profiles`,
+        { profileId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (data.success) {
         setUser(data.profile);
-        setPosts(data.posts)
-      }else{
-        toast.error(data.message)
+        setPosts(data.posts);
+        setShares(data.shares);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.message);
     }
+  };
+  // Handler để cập nhật post sau khi edit
+  const handlePostUpdated = (postId, newContent) => {
+    setPosts((prevFeed) =>
+      prevFeed.map((post) =>
+        post._id === postId ? { ...post, content: newContent } : post
+      )
+    );
+  };
+
+  // Handler để xóa post khỏi feed khi delete
+  const handlePostDeleted = (postId) => {
+    setPosts((prevFeed) => prevFeed.filter((post) => post._id !== postId));
   };
 
   useEffect(() => {
-    if(profileId){
-      fetchUser(profileId)
-    }else{
-      fetchUser(currentUser._id)
+    if (profileId) {
+      fetchUser(profileId);
+    } else {
+      fetchUser(currentUser._id);
     }
   }, [profileId, currentUser]);
 
@@ -70,7 +90,7 @@ const Profile = () => {
 
         <div className="mt-6">
           <div className="bg-white rounded-xl shadow p-1 flex max-w-md mx-auto">
-            {["posts", "media", "likes"].map((tab) => (
+            {["posts", "media", "likes", "shares"].map((tab) => (
               <button
                 onClick={() => setActiveTab(tab)}
                 key={tab}
@@ -84,37 +104,78 @@ const Profile = () => {
               </button>
             ))}
           </div>
-          {
-            activeTab === 'posts' && (
-              <div className="mt-6 flex flex-col items-center gap-6">
-                {posts.map((post)=> <PostCard key={post._id} post={post}/>)}
-              </div>
-            )
-          }
-          {
-            activeTab === 'media' && (
-              <div className="flex flex-wrap mt-6 max-w-6xl">
-                {
-                  posts.filter((post)=>post.image_urls.length > 0).map((post)=>(
-                    <>
-                    {post.image_urls.map((image, index)=>(
-                      <Link target="_blank" to={image} key={index} className="relative group">
-                        <img src={image} key={index} className="w-64 aspect-video object-cover" alt="" />
-                        <p className="absolute bottom-0 right-0 text-xs p-1 px-3 backdrop-blur-xl text-white opacity-0 group-hover:opacity-100 transition duration-300">Posted {moment(post.createdAt).fromNow()}</p>
+
+          {activeTab === "posts" && (
+            <div className="mt-6 flex flex-col items-center gap-6">
+              {posts
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .map((post) => (
+                  <PostCard
+                    key={post._id}
+                    post={post}
+                    onPostUpdated={handlePostUpdated}
+                    onPostDeleted={handlePostDeleted}
+                  />
+                ))}
+            </div>
+          )}
+
+          {activeTab === "shares" && (
+            <div className="mt-6 flex flex-col items-center gap-6">
+              {shares
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .map((share) => (
+                  <SharePostCard
+                    key={share._id}
+                    post={share}
+                    onPostUpdated={handlePostUpdated}
+                    onPostDeleted={handlePostDeleted}
+                  />
+                ))}
+            </div>
+          )}
+
+          {activeTab === "media" && (
+            <div className="flex flex-wrap mt-6 max-w-6xl">
+              {posts
+                .filter((post) => post.image_urls.length > 0)
+                .map((post) => (
+                  <>
+                    {post.image_urls.map((image, index) => (
+                      <Link
+                        target="_blank"
+                        to={image}
+                        key={index}
+                        className="relative group"
+                      >
+                        <img
+                          src={image}
+                          key={index}
+                          className="w-64 aspect-video object-cover"
+                          alt=""
+                        />
+                        <p className="absolute bottom-0 right-0 text-xs p-1 px-3 backdrop-blur-xl text-white opacity-0 group-hover:opacity-100 transition duration-300">
+                          Posted {moment(post.createdAt).fromNow()}
+                        </p>
                       </Link>
                     ))}
-                    </>
-                  ))
-                }
-              </div>
-            )
-          }
+                  </>
+                ))}
+            </div>
+          )}
         </div>
       </div>
-        {showEdit && <ProfileModal setShowEdit={setShowEdit}/>}
+      {showEdit && <ProfileModal setShowEdit={setShowEdit} />}
     </div>
   ) : (
-    <Loading />
+    <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <SkeletonUserProfile />
+      <div className="mt-6 flex flex-col items-center gap-6">
+        {[1, 2, 3].map((i) => (
+          <SkeletonPostCard key={i} />
+        ))}
+      </div>
+    </div>
   );
 };
 

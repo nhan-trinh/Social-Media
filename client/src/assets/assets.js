@@ -3,7 +3,7 @@ import sample_cover from './sample_cover.jpg'
 import sample_profile from './sample_profile.jpg'
 import bgImage from './bgImage.png'
 import group_users from './group_users.png'
-import { Home, MessageCircle, Search, UserIcon, Users } from 'lucide-react'
+import { Bell, Home, MessageCircle, Search, Settings, UserIcon, Users } from 'lucide-react'
 import sponsored_img from './sponsored_img.png'
 
 export const assets = {
@@ -12,15 +12,18 @@ export const assets = {
     sample_profile,
     bgImage,
     group_users,
-    sponsored_img
+    sponsored_img,
+
 }
 
 export const menuItemsData = [
     { to: '/', label: 'Feed', Icon: Home },
     { to: '/messages', label: 'Messages', Icon: MessageCircle },
     { to: '/connections', label: 'Friends', Icon: Users },
+    { to: '/notifications', label: 'Notifications', Icon: Bell },
     { to: '/discover', label: 'Discover', Icon: Search },
     { to: '/profile', label: 'Profile', Icon: UserIcon },
+    { to: '/setting', label: 'Setting', Icon: Settings },
 ];
 
 export const dummyUserData = {

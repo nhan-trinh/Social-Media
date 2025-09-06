@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Login from "./pages/Login";
 import Feed from "./pages/Feed";
@@ -17,6 +17,9 @@ import { fetchUser } from "./features/user/userSlice";
 import { fetchConnections } from "./features/connections/connectionSlice";
 import { addMessage } from "./features/messages/messagesSlice";
 import Notifications from "./components/Notifications";
+import Setting from "./pages/Setting";
+import CommentModal from "./components/CommentModal";
+import NotificationsFeed from "./pages/NotificationsFeed";
 
 const App = () => {
   const { user } = useUser();
@@ -24,18 +27,24 @@ const App = () => {
   const { pathname } = useLocation();
   const pathNameRef = useRef(pathname);
   const dispatch = useDispatch();
+  const [retryFetchUser, setRetryFetchUser] = useState(false);
 
   // Lấy thông tin user + connections khi user thay đổi
   useEffect(() => {
     const fetchData = async () => {
       if (user) {
         const token = await getToken();
-        dispatch(fetchUser(token));
+        const result = await dispatch(fetchUser(token));
         dispatch(fetchConnections(token));
+        // Nếu user chưa có trong backend, thử lại sau 2s
+        if (!result.payload) {
+          setTimeout(() => setRetryFetchUser((v) => !v), 2000);
+        }
       }
     };
     fetchData();
-  }, [user, getToken, dispatch]);
+    // Thêm retryFetchUser vào dependency để thử lại khi cần
+  }, [user, getToken, dispatch, retryFetchUser]);
 
   // Theo dõi thay đổi path
   useEffect(() => {
@@ -52,46 +61,47 @@ const App = () => {
 
     const connectSSE = () => {
       try {
-        const eventSourceUrl = `${import.meta.env.VITE_BASEURL}/api/message/${user.id}`;
+        const eventSourceUrl = `${import.meta.env.VITE_BASEURL}/api/message/${
+          user.id
+        }`;
         eventSource = new EventSource(eventSourceUrl);
 
         eventSource.onopen = () => {
-          console.log('SSE Connected successfully');
+          console.log("SSE Connected successfully");
           retryCount = 0;
         };
 
         eventSource.onmessage = (event) => {
           try {
-            console.log('Raw SSE data:', event.data);
+            console.log("Raw SSE data:", event.data);
             const response = JSON.parse(event.data);
 
             // Xử lý tin nhắn mới
-            if (response.type === 'new_message' && response.data) {
+            if (response.type === "new_message" && response.data) {
               const message = response.data;
-              console.log('New message received:', message);
+              console.log("New message received:", message);
 
               // Thêm tin nhắn vào store
               dispatch(addMessage(message));
 
               // Lấy senderId
-              const senderId = typeof message.from_user_id === "object" 
-                ? message.from_user_id._id 
-                : message.from_user_id;
+              const senderId =
+                typeof message.from_user_id === "object"
+                  ? message.from_user_id._id
+                  : message.from_user_id;
 
               // Hiện toast nếu không ở trong chat với người gửi
               if (pathNameRef.current !== `/messages/${senderId}`) {
                 // Sử dụng custom notification component
-                toast.custom((t) => (
-                  <Notifications t={t} message={message} />
-                ), {
+                toast.custom((t) => <Notifications t={t} message={message} />, {
                   duration: 5000,
-                  position: "bottom-right"
+                  position: "bottom-right",
                 });
               }
             }
             // Xử lý connection message
-            else if (response.type === 'connection') {
-              console.log('SSE connection established:', response.message);
+            else if (response.type === "connection") {
+              console.log("SSE connection established:", response.message);
             }
           } catch (parseError) {
             console.error("Error parsing SSE message:", parseError, event.data);
@@ -101,19 +111,20 @@ const App = () => {
         eventSource.onerror = (error) => {
           console.error("SSE Error:", error);
           eventSource.close();
-          
+
           // Retry connection
           if (retryCount < maxRetries) {
             retryCount++;
-            console.log(`Retrying SSE connection... (${retryCount}/${maxRetries})`);
+            console.log(
+              `Retrying SSE connection... (${retryCount}/${maxRetries})`
+            );
             setTimeout(connectSSE, 2000 * retryCount);
           } else {
-            console.error('Max retries reached. SSE connection failed.');
+            console.error("Max retries reached. SSE connection failed.");
           }
         };
-
       } catch (error) {
-        console.error('Failed to create SSE connection:', error);
+        console.error("Failed to create SSE connection:", error);
       }
     };
 
@@ -121,7 +132,7 @@ const App = () => {
 
     return () => {
       if (eventSource) {
-        console.log('Closing SSE connection');
+        console.log("Closing SSE connection");
         eventSource.close();
       }
     };
@@ -136,10 +147,13 @@ const App = () => {
           <Route path="messages" element={<Message />} />
           <Route path="messages/:userId" element={<ChatBox />} />
           <Route path="connections" element={<Connections />} />
+          <Route path="notifications" element={<NotificationsFeed />} />
           <Route path="discover" element={<Discover />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:profileId" element={<Profile />} />
           <Route path="create-post" element={<CreatePost />} />
+          <Route path="setting" element={<Setting />} />
+          <Route path="comment-modal" element={<CommentModal />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

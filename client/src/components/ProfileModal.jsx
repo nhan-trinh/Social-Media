@@ -58,7 +58,7 @@ const ProfileModal = ({ setShowEdit }) => {
                 handleSaveProfile(),
                 {
                   loading: 'Saving...',
-                  success: 'Profile updated successfully!',
+                  success: '',
                   error: (err) => err?.message || 'Failed to update profile',
                 }
               );
