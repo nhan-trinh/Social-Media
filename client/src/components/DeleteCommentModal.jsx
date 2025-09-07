@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
+import useOutsideClickOrScroll from "../hooks/useOutsideClickOrScroll";
 
 const DeleteCommentModal = ({ 
   isOpen, 
@@ -13,6 +14,7 @@ const DeleteCommentModal = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const { getToken } = useAuth();
+  const modalRef = useOutsideClickOrScroll(onClose)
 
   const handleDelete = async () => {
     if (!commentId) {
@@ -51,7 +53,7 @@ const DeleteCommentModal = ({
 
   return (
     <div className="fixed inset-0 z-[110] min-h-screen bg-black/30 backdrop-blur text-white flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+      <div ref={modalRef} className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">

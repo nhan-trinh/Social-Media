@@ -4,10 +4,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { updateUser } from '../features/user/userSlice'
 import { useAuth } from '@clerk/clerk-react'
 import toast from 'react-hot-toast'
+import useOutsideClickOrScroll from '../hooks/useOutsideClickOrScroll'
 
 const ProfileModal = ({ setShowEdit }) => {
   const dispatch = useDispatch();
   const { getToken } = useAuth();
+  const modalRef = useOutsideClickOrScroll(setShowEdit)
 
   const user = useSelector((state) => state.user.value);
 
@@ -47,7 +49,7 @@ const ProfileModal = ({ setShowEdit }) => {
   return (
     <div className="fixed top-0 bottom-0 left-0 right-0 z-110 h-screen overflow-y-scroll bg-black/50">
       <div className="max-w-2xl sm:py-6 mx-auto ">
-        <div className="bg-white rounded-lg shadow p-6">
+        <div ref={modalRef} className="bg-white rounded-lg shadow p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h1>
 
           <form

@@ -5,11 +5,13 @@ import { useAuth } from "@clerk/clerk-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import useOutsideClickOrScroll from "../hooks/useOutsideClickOrScroll";
 
 const EditShareModal = ({ isOpen, onClose, post, onPostUpdated }) => {
   const [content, setContent] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const { getToken } = useAuth();
+  const modalRef = useOutsideClickOrScroll(onClose)
   const navigate = useNavigate();
 
   // Initialize content when modal opens
@@ -70,7 +72,7 @@ const EditShareModal = ({ isOpen, onClose, post, onPostUpdated }) => {
 
   return (
     <div className="fixed inset-0 z-[110] min-h-screen bg-black/30 backdrop-blur flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+      <div ref={modalRef} className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
