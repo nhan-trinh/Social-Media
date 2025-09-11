@@ -23,6 +23,15 @@ export const addPost = async (req, res) => {
             folder: "posts",
           });
 
+          // Detect if the uploaded file is a video
+          const isVideo = (image.mimetype && image.mimetype.startsWith("video")) || /\.(mp4|webm|ogg)$/i.test(image.originalname || "");
+
+          if (isVideo) {
+            // For videos, keep the original format URL so the browser can play it
+            return response.url;
+          }
+
+          // For images, continue serving optimized WEBP with width/quality transformations
           const url = imagekit.url({
             path: response.filePath,
             transformation: [
@@ -175,75 +184,3 @@ export const updatePost = async (req, res) => {
   }
 };
 
-// export const sharePost = async (req, res) => {
-//   try {
-//     const { userId } = req.auth();
-//     const {postId, content} = req.body;
-
-//     const originalPost = await Post.findById(postId).populate("user")
-
-//     if(!originalPost) {
-//       return res.json({ success: false, message: "Post not found" });
-//     }
-
-//     if(originalPost.shared_post) {
-//       return res.json({success: false,
-//         message: "You cannot share a shared post"
-//       })
-//     }
-
-//     const existingShare = await Post.findOne({
-//       user: userId,
-//       share_post: originalPost._id
-//     })
-
-//     if(existingShare) {
-//       return res.json({success: false,
-//         message: "You have already shared this post"
-//       })
-//     }
-
-//     const sharedPost = await Post.create({
-//       user: userId,
-//       content: content || "", // User comment khi share
-//       post_type: originalPost.post_type,
-//       shared_post: postId,
-//       is_original: false,
-//       comments_count: 0,
-//       share_count: 0,
-//     });
-
-//         await Post.findByIdAndUpdate(postId, {
-//       $inc: { share_count: 1 }
-//     });
-
-//     // Populate user data cho response
-//     await sharedPost.populate("user");
-
-//     res.json({
-//       success: true,
-//       message: "Post shared successfully",
-//       post: sharedPost
-//     });
-
-//   } catch (error) {
-//     console.log(error);
-//     res.json({ success: false, message: error.message });
-//   }
-// }
-
-// export const getSharedPosts = async (req, res) => {
-//   try {
-//     const {postId} = req.params;
-
-//     const sharedPosts = await Post.find({shared_post: postId}).populate("user").sort({ createdAt: -1 });
-//       res.json({
-//       success: true,
-//       shares,
-//       count: shares.length
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.json({ success: false, message: error.message });
-//   }
-// }
