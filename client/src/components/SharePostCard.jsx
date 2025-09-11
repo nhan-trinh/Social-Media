@@ -221,10 +221,10 @@ const SharePostCard = ({
   // Nếu bị ẩn
   if (isHidden) {
     return (
-      <div className="bg-gray-100 rounded-xl shadow p-4 space-y-4 w-full max-w-2xl border-2 border-dashed border-gray-300">
+      <div className="bg-gray-100 rounded-xl dark:bg-gray-900 shadow p-4 space-y-4 w-full max-w-2xl border-2 border-dashed border-gray-300 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <EyeOff className="w-5 h-5 text-gray-500" />
+            <EyeOff className="w-5 h-5 text-gray-500 dark:text-gray-300" />
             <span className="text-gray-600 text-sm">Post hidden</span>
           </div>
           <button
@@ -235,14 +235,14 @@ const SharePostCard = ({
             Undo
           </button>
         </div>
-        <div className="text-gray-500 text-sm">
+        <div className="text-gray-500 dark:text-gray-400 text-sm">
           Post by @{post.user.username} • {moment(post.createdAt).fromNow()}
         </div>
       </div>
     );
   }
   return (
-    <div className="bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl">
+    <div className="bg-white dark:bg-primary-dark rounded-xl shadow p-4 space-y-4 w-full max-w-2xl text-slate-900 dark:text-slate-100">
       <div className="flex items-start justify-between">
         <div
           onClick={() => navigate(`/profile/` + post.user._id)}
@@ -252,13 +252,17 @@ const SharePostCard = ({
             src={post.user.profile_picture}
             alt=""
             className="w-10 h-10 rounded-full shadow"
+            loading="lazy"
+            decoding="async"
+            width={40}
+            height={40}
           />
           <div>
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center dark:text-slate-200 space-x-1">
               <span>{post.user.full_name}</span>
               <BadgeCheck className="w-4 h-4 text-blue-500" />
             </div>
-            <div className="text-gray-500 text-sm">
+            <div className="text-gray-500 dark:text-gray-400 text-sm">
               @{post.user.username} has shared{" "}
               {moment(post.createdAt).fromNow()}
             </div>
@@ -267,25 +271,25 @@ const SharePostCard = ({
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="p-2 hover:bg-gray-100 rounded-full transition"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition"
           >
-            <Ellipsis className="w-5 h-5 text-gray-500" />
+            <Ellipsis className="w-5 h-5 text-gray-500 dark:text-gray-300" />
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[150px] z-50">
+            <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-[150px] z-50">
               {isOwner ? (
                 <>
                   <button
                     onClick={handleEditPost}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
                   >
                     <Edit className="w-4 h-4" />
                     Edit Post
                   </button>
                   <button
                     onClick={handleDeletePost}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 text-red-600 flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 text-red-600 flex items-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete Post
@@ -294,7 +298,7 @@ const SharePostCard = ({
               ) : (
                 <button
                   onClick={handleHidePost}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
                 >
                   <EyeOff className="w-4 h-4" />
                   Hide Post
@@ -309,7 +313,7 @@ const SharePostCard = ({
       {post.content && (
         <div className="px-4 pb-2">
           <p
-            className="text-gray-800 leading-relaxed whitespace-pre-line"
+            className="text-gray-800 dark:text-slate-200 leading-relaxed whitespace-pre-line"
             dangerouslySetInnerHTML={{
               __html: post.content.replace(
                 /(#\w+)/g,
@@ -323,10 +327,10 @@ const SharePostCard = ({
       {/* Block bài viết gốc */}
       {isOriginalPostDeleted ? (
         // Hiển thị khi bài gốc bị xóa
-        <div className="mx-4 mb-4 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+        <div className="mx-4 mb-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800">
           <div className="p-4 text-center">
-            <AlertTriangle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-600 text-sm">
+            <AlertTriangle className="w-8 h-8 dark:text-gray-400 text-gray-400 mx-auto mb-2" />
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
               {post.shared_post?.message || "Content isn't available right now"}
             </p>
           </div>
@@ -335,7 +339,7 @@ const SharePostCard = ({
         // Hiển thị bài gốc bình thường
         <div
           onClick={() => setIsOriginalPostCommentOpen(true)}
-          className="mx-4 mb-4 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 cursor-pointer"
+          className="mx-4 mb-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800 cursor-pointer"
         >
           <div className="p-3">
             {/* Header người đăng bài gốc */}
@@ -367,7 +371,7 @@ const SharePostCard = ({
 
             {/* Nội dung bài gốc */}
             {post.shared_post.content && (
-              <p className="text-sm text-gray-700 mb-2 mt-3 whitespace-pre-line">
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 mt-3 whitespace-pre-line">
                 {post.shared_post.content}
               </p>
             )}
@@ -428,7 +432,7 @@ const SharePostCard = ({
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 text-gray-600 text-sm pt-2 border-t border-gray-300">
+      <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300 text-sm pt-2 border-t border-gray-300 dark:border-gray-700">
         <div className="flex items-center gap-1">
           <Heart
             className={`w-4 h-4 cursor-pointer ${

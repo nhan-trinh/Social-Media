@@ -314,10 +314,10 @@ const CommentShareModel = ({
   return (
     <>
       <div className="fixed inset-0 z-[110] min-h-screen bg-black/30 backdrop-blur text-white flex items-center justify-center p-4">
-        <div ref={modalRef} className="bg-white text-zinc-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col">
+        <div ref={modalRef} className="bg-white text-zinc-900 dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3 border-t border-l border-r border-gray-200 rounded-t-lg sticky top-0 bg-white z-10">
-            <h3 className="text-lg font-semibold">
+          <div className="flex items-center justify-between px-5 dark:bg-gray-900 py-3 border-t border-l border-r border-gray-200 dark:border-gray-900 rounded-t-lg sticky top-0 bg-white z-10">
+            <h3 className="text-lg dark:text-white font-semibold">
               Comments (
               {comments.reduce(
                 (total, comment) => total + 1 + (comment.replies?.length || 0),
@@ -346,8 +346,8 @@ const CommentShareModel = ({
                 />
                 <div>
                   <div className="flex items-center gap-1">
-                    <span className="font-semibold">{post.user.full_name}</span>
-                    <BadgeCheck className="w-4 h-4 text-blue-500" />
+                    <span className="font-semibold dark:text-white">{post.user.full_name}</span>
+                    <BadgeCheck className="w-4 h-4 text-blue-500 " />
                   </div>
                   <p className="text-sm text-gray-500">
                     @{post.user.username} • {moment(post.createdAt).fromNow()}
@@ -358,7 +358,7 @@ const CommentShareModel = ({
               {post.content && (
                 <div className="px-4 pb-2">
                   <p
-                    className="text-gray-800 leading-relaxed whitespace-pre-line"
+                    className="text-gray-800 dark:text-white leading-relaxed whitespace-pre-line"
                     dangerouslySetInnerHTML={{
                       __html: post.content.replace(
                         /(#\w+)/g,
@@ -369,8 +369,8 @@ const CommentShareModel = ({
                 </div>
               )}
 
-              <div className="mx-4 mb-4 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 ">
-                <div className="p-3">
+              <div className="mx-4 mb-4 border border-gray-200  rounded-lg overflow-hidden bg-gray-50 ">
+                <div className="p-3 dark:border-gray-700">
                   {/* Header người đăng bài gốc */}
                   <div
                     onClick={() =>
@@ -482,7 +482,7 @@ const CommentShareModel = ({
                   ))}
                 </div>
               ) : comments.length === 0 ? (
-                <p className="text-center text-gray-500">
+                <p className="text-center text-gray-500 dark:text-gray-400">
                   Be the first one to comment!
                 </p>
               ) : (
@@ -497,15 +497,15 @@ const CommentShareModel = ({
                         className="w-9 h-9 rounded-full object-cover shadow cursor-pointer"
                       />
                       <div className="flex-1">
-                        <div className="bg-gray-100 rounded-2xl px-4 py-2">
+                        <div className="bg-gray-100 dark:bg-primary-dark rounded-2xl px-4 py-2">
                           <div className="flex items-center gap-2 mb-1">
                             <span
                               onClick={() => navigate(`/profile/` + c.user._id)}
-                              className="font-medium text-sm text-zinc-900 cursor-pointer hover:underline"
+                              className="font-medium text-sm text-zinc-900 dark:text-white cursor-pointer hover:underline"
                             >
                               {c.user.full_name}
                             </span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               @{c.user.username}
                             </span>
                           </div>
@@ -542,7 +542,7 @@ const CommentShareModel = ({
                               </button>
                             </div>
                           ) : (
-                            <p className="text-sm text-gray-800">{c.content}</p>
+                            <p className="text-sm text-gray-800 dark:text-gray-400">{c.content}</p>
                           )}
                         </div>
 
@@ -665,17 +665,17 @@ const CommentShareModel = ({
                               className="w-8 h-8 rounded-full object-cover shadow cursor-pointer"
                             />
                             <div className="flex-1">
-                              <div className="bg-gray-50 rounded-2xl px-4 py-2">
+                              <div className="bg-gray-50 dark:bg-primary-dark rounded-2xl px-4 py-2">
                                 <div className="flex items-center gap-2 mb-1">
                                   <span
                                     onClick={() =>
                                       navigate(`/profile/` + reply.user._id)
                                     }
-                                    className="font-medium text-sm text-zinc-900 cursor-pointer hover:underline"
+                                    className="font-medium text-sm text-zinc-900 dark:text-white cursor-pointer hover:underline"
                                   >
                                     {reply.user.full_name}
                                   </span>
-                                  <span className="text-xs text-gray-500">
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
                                     @{reply.user.username}
                                   </span>
                                 </div>
@@ -716,7 +716,7 @@ const CommentShareModel = ({
                                     </button>
                                   </div>
                                 ) : (
-                                  <p className="text-sm text-gray-800">
+                                  <p className="text-sm text-gray-800 dark:text-gray-400">
                                     {reply.content}
                                   </p>
                                 )}
@@ -782,20 +782,20 @@ const CommentShareModel = ({
           </div>
 
           {/* Input */}
-          <div className="border-t border-b border-gray-200 px-5 py-3 bg-gray-50 rounded-lg">
+          <div className="border-t border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700 px-5 py-3 bg-gray-50 rounded-lg">
             <form onSubmit={handleSubmitComment} className="flex gap-3">
               <img
                 src={currentUser.profile_picture}
                 alt=""
                 className="w-9 h-9 rounded-full object-cover"
               />
-              <div className="flex-1 flex items-center bg-white border border-gray-300 rounded-full px-4 py-2 focus-within:border-indigo-500 transition">
+              <div className="flex-1 flex items-center bg-white border dark:bg-primary-dark border-gray-300 rounded-full px-4 py-2 focus-within:border-indigo-500 transition">
                 <input
                   type="text"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Write a comment..."
-                  className="flex-1 bg-transparent outline-none text-sm text-zinc-900 placeholder-gray-400"
+                  className="flex-1 bg-transparent outline-none text-sm text-zinc-900 dark:text-white placeholder-gray-400"
                   disabled={submitting}
                 />
                 <button

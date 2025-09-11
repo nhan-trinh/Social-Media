@@ -67,7 +67,7 @@ const RecentMessage = () => {
 
   if (loading && messages.length === 0) {
     return (
-      <div className="bg-white max-w-xs mt-4 p-4 min-h-4 rounded-md shadow text-xs text-slate-800">
+      <div className="bg-white max-w-xs mt-4 p-4 dark:bg-gray-900 min-h-4 rounded-md shadow text-xs text-slate-800">
         <h3 className="font-semibold text-slate-800 mb-4">Recent Messages</h3>
         <div className="flex flex-col space-y-3">
           {[...Array(3)].map((_, index) => (
@@ -85,9 +85,9 @@ const RecentMessage = () => {
   }
 
   return (
-    <div className="bg-white max-w-xs mt-4 p-4 min-h-4 rounded-md shadow text-xs text-slate-800">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-slate-800">Recent Messages</h3>
+    <div className="bg-white max-w-xs mt-4 p-4 min-h-4 dark:bg-primary-dark rounded-md shadow text-xs text-slate-800">
+      <div className="flex items-center dark:text-gray-400 justify-between mb-4">
+        <h3 className="font-semibold dark:text-gray-400 text-slate-800">Recent Messages</h3>
         <button
           onClick={fetchRecentMessages}
           className="text-indigo-500 hover:text-indigo-700 text-[10px] opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
@@ -99,7 +99,7 @@ const RecentMessage = () => {
 
       <div className="flex flex-col max-h-56 overflow-y-auto">
         {messages.length === 0 ? (
-          <div className="text-center py-4 text-slate-500">
+          <div className="text-center dark:text-gray-400 py-4 text-slate-500">
             <p>Chưa có tin nhắn nào</p>
           </div>
         ) : (
@@ -117,7 +117,7 @@ const RecentMessage = () => {
 
               <div className="w-full min-w-0">
                 <div className="flex justify-between items-start mb-0.5">
-                  <p className="font-medium text-slate-700 truncate">
+                  <p className="font-medium text-slate-700 dark:text-gray-400 truncate">
                     {message.from_user_id.full_name}
                   </p>
                   <p className="text-[10px] text-slate-400 flex-shrink-0 ml-1">
@@ -126,7 +126,7 @@ const RecentMessage = () => {
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <p className="text-slate-600 truncate flex-1">
+                  <p className="text-slate-600 dark:text-gray-400 truncate flex-1">
                     {truncateText(message.text)}
                   </p>
 

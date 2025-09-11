@@ -72,10 +72,10 @@ const EditShareModal = ({ isOpen, onClose, post, onPostUpdated }) => {
 
   return (
     <div className="fixed inset-0 z-[110] min-h-screen bg-black/30 backdrop-blur flex items-center justify-center p-4">
-      <div ref={modalRef} className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+      <div ref={modalRef} className="bg-white rounded-2xl dark:bg-gray-900 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-400 flex items-center gap-2">
             <Edit className="w-5 h-5 text-indigo-600" />
             Edit Post
           </h3>
@@ -109,7 +109,7 @@ const EditShareModal = ({ isOpen, onClose, post, onPostUpdated }) => {
 
           {/* Content Editor */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
               Post Content
             </label>
             <textarea
@@ -117,7 +117,7 @@ const EditShareModal = ({ isOpen, onClose, post, onPostUpdated }) => {
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="What's on your mind?"
-              className="w-full min-h-[120px] p-3 border border-gray-300 rounded-lg resize-none outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
+              className="w-full min-h-[120px] p-3 border border-gray-300 dark:border-gray-700 rounded-lg resize-none outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
               disabled={isUpdating}
             />
             <div className="flex justify-between items-center mt-2">
@@ -168,7 +168,7 @@ const EditShareModal = ({ isOpen, onClose, post, onPostUpdated }) => {
           {/* Images (if any) */}
           <div
             onClick={() => setIsOriginalPostCommentOpen(true)}
-            className="mx-4 mb-4 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 cursor-pointer"
+            className="mx-4 mb-4 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 rounded-lg overflow-hidden bg-gray-50 cursor-pointer"
           >
             <div className="p-3">
               {/* Header người đăng bài gốc */}
@@ -186,7 +186,7 @@ const EditShareModal = ({ isOpen, onClose, post, onPostUpdated }) => {
                 />
                 <div>
                   <div className="flex items-center space-x-1">
-                    <span className="text-sm font-medium">
+                    <span className="text-sm dark:text-gray-400 font-medium">
                       {post.shared_post.user.full_name}
                     </span>
                     <BadgeCheck className="w-4 h-4 text-blue-500" />
@@ -200,7 +200,7 @@ const EditShareModal = ({ isOpen, onClose, post, onPostUpdated }) => {
 
               {/* Nội dung bài gốc */}
               {post.shared_post.content && (
-                <p className="text-sm text-gray-700 mb-2 mt-3 whitespace-pre-line">
+                <p className="text-sm text-gray-700 dark:text-gray-400 mb-2 mt-3 whitespace-pre-line">
                   {post.shared_post.content}
                 </p>
               )}
@@ -263,7 +263,7 @@ const EditShareModal = ({ isOpen, onClose, post, onPostUpdated }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-200">
+        <div className="flex gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}
             disabled={isUpdating}

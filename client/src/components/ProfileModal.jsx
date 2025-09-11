@@ -49,8 +49,8 @@ const ProfileModal = ({ setShowEdit }) => {
   return (
     <div className="fixed top-0 bottom-0 left-0 right-0 z-110 h-screen overflow-y-scroll bg-black/50">
       <div className="max-w-2xl sm:py-6 mx-auto ">
-        <div ref={modalRef} className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h1>
+        <div ref={modalRef} className="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Edit Profile</h1>
 
           <form
             className="space-y-4"
@@ -68,7 +68,7 @@ const ProfileModal = ({ setShowEdit }) => {
           >
             {/* Profile Picture */}
             <div className="flex flex-col items-start gap-3">
-              <label htmlFor="profile_picture" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="profile_picture" className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                 Profile Picture
                 <input
                   hidden
@@ -96,7 +96,7 @@ const ProfileModal = ({ setShowEdit }) => {
 
             {/* Cover Photo */}
             <div className="flex flex-col items-start gap-3">
-              <label htmlFor="cover_photo" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="cover_photo" className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                 Cover Photo
                 <input
                   hidden
@@ -124,10 +124,10 @@ const ProfileModal = ({ setShowEdit }) => {
 
             {/* Full Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name:</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name:</label>
               <input
                 type="text"
-                className="w-full p-3 border border-gray-200 rounded-lg"
+                className="w-full p-3 border border-gray-200  dark:border-gray-700 rounded-lg"
                 placeholder="Enter your name"
                 onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
                 value={editForm.full_name}
@@ -136,10 +136,10 @@ const ProfileModal = ({ setShowEdit }) => {
 
             {/* Username */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username:</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Username:</label>
               <input
                 type="text"
-                className="w-full p-3 border border-gray-200 rounded-lg"
+                className="w-full p-3 border border-gray-200  dark:border-gray-700 rounded-lg"
                 placeholder="Enter your username"
                 onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
                 value={editForm.username}
@@ -148,10 +148,10 @@ const ProfileModal = ({ setShowEdit }) => {
 
             {/* Bio */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bio:</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Bio:</label>
               <textarea
                 rows={3}
-                className="w-full p-3 border border-gray-200 rounded-lg"
+                className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
                 placeholder="Your bio"
                 onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                 value={editForm.bio}
@@ -160,10 +160,10 @@ const ProfileModal = ({ setShowEdit }) => {
 
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location:</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Location:</label>
               <input
                 type="text"
-                className="w-full p-3 border border-gray-200 rounded-lg"
+                className="w-full p-3 border border-gray-200  dark:border-gray-700 rounded-lg"
                 placeholder="Enter your location"
                 onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
                 value={editForm.location}
@@ -175,7 +175,7 @@ const ProfileModal = ({ setShowEdit }) => {
               <button
                 onClick={() => setShowEdit(false)}
                 type="button"
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:bg-primary-dark dark:border-gray-700 dark:text-white transition-colors cursor-pointer"
               >
                 Cancel
               </button>

@@ -363,20 +363,20 @@ const CommentModal = ({
           </div>
 
           {/* Right Side - Content and Comments */}
-          <div className="w-full md:w-96 md:min-w-96 flex flex-col bg-white md:border-l border-gray-200">
+          <div className="w-full md:w-96 md:min-w-96 flex flex-col bg-white dark:bg-gray-900 md:border-l border-gray-200 dark:border-gray-700">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <h3 className="text-lg font-semibold">Comments</h3>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg dark:text-white font-semibold">Comments</h3>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition"
+                className="p-2 hover:bg-gray-100 dark:bg-gray-500 rounded-full transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Post Info */}
-            <div className="px-4 py-3 border-b border-gray-200">
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
               <div
                 onClick={() => navigate(`/profile/` + post.user._id)}
                 className="flex items-center gap-3 cursor-pointer"
@@ -388,7 +388,7 @@ const CommentModal = ({
                 />
                 <div>
                   <div className="flex items-center gap-1">
-                    <span className="font-semibold text-sm">
+                    <span className="font-semibold text-sm dark:text-white">
                       {post.user.full_name}
                     </span>
                     <BadgeCheck className="w-4 h-4 text-blue-500" />
@@ -401,7 +401,7 @@ const CommentModal = ({
 
               {post.content && (
                 <p
-                  className="text-gray-800 text-sm leading-relaxed mt-3"
+                  className="text-gray-800 dark:text-white text-sm leading-relaxed mt-3"
                   dangerouslySetInnerHTML={{ __html: postWithHashtags }}
                 />
               )}
@@ -462,11 +462,11 @@ const CommentModal = ({
                   Be the first one to comment!
                 </p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 ">
                   {comments.map((c) => (
                     <div key={c._id} className="space-y-2">
                       {/* Main comment */}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 ">
                         <img
                           onClick={() => navigate(`/profile/` + c.user._id)}
                           src={c.user.profile_picture}
@@ -474,13 +474,13 @@ const CommentModal = ({
                           className="w-8 h-8 rounded-full object-cover cursor-pointer"
                         />
                         <div className="flex-1">
-                          <div className="bg-gray-100 rounded-lg px-3 py-2">
+                          <div className="bg-gray-100 rounded-lg px-3 py-2 dark:bg-primary-dark">
                             <div className="flex items-center gap-1 mb-1">
                               <span
                                 onClick={() =>
                                   navigate(`/profile/` + c.user._id)
                                 }
-                                className="font-medium text-xs text-zinc-900 cursor-pointer hover:underline"
+                                className="font-medium text-xs text-zinc-900 cursor-pointer dark:text-white hover:underline"
                               >
                                 {c.user.full_name}
                               </span>
@@ -511,7 +511,7 @@ const CommentModal = ({
                                 </button>
                               </div>
                             ) : (
-                              <p className="text-xs text-gray-800">
+                              <p className="text-xs text-gray-800 dark:text-gray-400">
                                 {c.content}
                               </p>
                             )}
@@ -634,13 +634,13 @@ const CommentModal = ({
                                 className="w-6 h-6 rounded-full object-cover cursor-pointer"
                               />
                               <div className="flex-1">
-                                <div className="bg-gray-50 rounded-lg px-2 py-1">
+                                <div className="bg-gray-50 dark:bg-primary-dark rounded-lg px-2 py-1">
                                   <div className="flex items-center gap-1 mb-1">
                                     <span
                                       onClick={() =>
                                         navigate(`/profile/` + reply.user._id)
                                       }
-                                      className="font-medium text-xs text-zinc-900 cursor-pointer hover:underline"
+                                      className="font-medium text-xs text-zinc-900 dark:text-white cursor-pointer hover:underline"
                                     >
                                       {reply.user.full_name}
                                     </span>
@@ -673,7 +673,7 @@ const CommentModal = ({
                                       </button>
                                     </div>
                                   ) : (
-                                    <p className="text-xs text-gray-800">
+                                    <p className="text-xs text-gray-800 dark:text-gray-400">
                                       {reply.content}
                                     </p>
                                   )}
@@ -742,14 +742,14 @@ const CommentModal = ({
             </div>
 
             {/* Comment Input */}
-            <div className="border-t border-gray-200 px-4 py-3">
+            <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
               <form onSubmit={handleSubmitComment} className="flex gap-2">
                 <img
                   src={currentUser.profile_picture}
                   alt=""
                   className="w-8 h-8 rounded-full object-cover"
                 />
-                <div className="flex-1 flex items-center bg-gray-50 border border-gray-300 rounded-full px-3 py-2 focus-within:border-indigo-500 transition">
+                <div className="flex-1 flex items-center bg-gray-50 dark:bg-gray-500 border border-gray-300 rounded-full px-3 py-2 focus-within:border-indigo-500 transition">
                   <input
                     type="text"
                     value={comment}
