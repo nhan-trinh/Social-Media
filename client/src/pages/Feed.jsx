@@ -110,7 +110,7 @@ const Feed = () => {
   };
 
   return (
-    <div className="h-full overflow-y-scroll no-scrollbar py-10 xl:pr-5 flex items-start justify-center xl:gap-8">
+    <div className="h-full dark:bg-gray-900 overflow-y-scroll no-scrollbar py-10 xl:pr-5 flex items-start justify-center xl:gap-8">
       <div>
         {/* Nếu loading => show skeleton, ngược lại show StoriesBar */}
         {loading ? <SkeletonStoriesBar /> : <StoriesBar />}
@@ -123,15 +123,19 @@ const Feed = () => {
       </div>
 
       <div className="max-xl:hidden sticky top-0">
-        <div className="max-w-xs bg-white text-xs p-4 rounded-md inline-flex flex-col gap-2 shadow">
-          <h3 className="text-slate-800 font-semibold">Sponsored</h3>
+        <div className="max-w-xs bg-white dark:bg-primary-dark   text-xs p-4 rounded-md inline-flex flex-col gap-2 shadow">
+          <h3 className="text-slate-800 dark:text-gray-400 font-semibold">Sponsored</h3>
           <img
             src={assets.sponsored_img}
             className="w-75 h-50 rounded-md"
+            loading="lazy"
+            decoding="async"
+            width={300}
+            height={200}
             alt=""
           />
           <p className="text-slate-600">Email marketing</p>
-          <p className="text-slate-400">
+          <p className="text-slate-400 dark:text-gray-400">
             SuperCharge your marketing with a powerful, easy-to-use platform
             built for results.
           </p>

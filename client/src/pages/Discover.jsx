@@ -42,18 +42,18 @@ const Discover = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="relative h h-full overflow-y-scroll bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
             Discover Friend
           </h1>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-gray-400">
             Connect with amzing people all around the world
           </p>
         </div>
 
-        <div className="mb-8 shadow-md rounded-md border border-slate-200/60 bg-white/80">
+        <div className="mb-8 shadow-md rounded-md border border-slate-200/60 bg-white/80 dark:bg-primary-dark">
           <div className="p-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />

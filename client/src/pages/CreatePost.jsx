@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { useAuth } from "@clerk/clerk-react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
-
+import "../css/Uploadfile.css";
 const CreatePost = () => {
   const navigate = useNavigate();
 
@@ -58,16 +58,18 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-900">
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-teal-50 mb-2">
             Create Post
           </h1>
-          <p className="text-slate-600">Share your thoughts with the world</p>
+          <p className="text-slate-600 dark:text-gray-400">
+            Share your thoughts with the world
+          </p>
         </div>
 
-        <div className="max-w-xl bg-white p-4 sm:p-8 sm:pb-3 rounded-xl shadow-md space-y-4">
+        <div className="max-w-xl bg-white dark:bg-primary-dark p-4 sm:p-8 sm:pb-3 rounded-xl shadow-md space-y-4">
           <div className="flex items-center gap-3">
             <img
               src={user.profile_picture}
@@ -119,7 +121,15 @@ const CreatePost = () => {
               htmlFor="images"
               className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition cursor-pointer"
             >
-              <Image className="size-6" />
+              <div className="file-upload-container">
+                <div className="folder">
+                  <div className="front-side">
+                    <div className="tip" />
+                    <div className="cover" />
+                  </div>
+                  <div className="back-side cover" />
+                </div>
+              </div>
             </label>
             <input
               type="file"

@@ -1,25 +1,26 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, lazy, Suspense } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
-import Login from "./pages/Login";
-import Feed from "./pages/Feed";
-import Message from "./pages/Message";
-import ChatBox from "./pages/ChatBox";
-import Connections from "./pages/Connections";
-import Discover from "./pages/Discover";
-import Profile from "./pages/Profile";
-import CreatePost from "./pages/CreatePost";
+const Login = lazy(() => import("./pages/Login"));
+const Feed = lazy(() => import("./pages/Feed"));
+const Message = lazy(() => import("./pages/Message"));
+const ChatBox = lazy(() => import("./pages/ChatBox"));
+const Connections = lazy(() => import("./pages/Connections"));
+const Discover = lazy(() => import("./pages/Discover"));
+const Profile = lazy(() => import("./pages/Profile"));
+const CreatePost = lazy(() => import("./pages/CreatePost"));
 import { useUser, useAuth } from "@clerk/clerk-react";
-import Layout from "./layout/Layout";
+const Layout = lazy(() => import("./layout/Layout"));
 import { Toaster, toast } from "react-hot-toast";
-import NotFound from "./layout/404NotFound";
+const NotFound = lazy(() => import("./layout/404NotFound"));
 import { useDispatch } from "react-redux";
 import { fetchUser } from "./features/user/userSlice";
 import { fetchConnections } from "./features/connections/connectionSlice";
 import { addMessage } from "./features/messages/messagesSlice";
 import Notifications from "./components/Notifications";
-import Setting from "./pages/Setting";
-import CommentModal from "./components/CommentModal";
-import NotificationsFeed from "./pages/NotificationsFeed";
+import DarkModeToggle from "./components/DarkModeToggle";
+const Setting = lazy(() => import("./pages/Setting"));
+const NotificationsFeed = lazy(() => import("./pages/NotificationsFeed"));
+const CommentModal = lazy(() => import("./components/CommentModal"));
 
 const App = () => {
   const { user } = useUser();
@@ -28,6 +29,10 @@ const App = () => {
   const pathNameRef = useRef(pathname);
   const dispatch = useDispatch();
   const [retryFetchUser, setRetryFetchUser] = useState(false);
+  const location = useLocation();
+
+const visiblePath = ["/profile"];
+const shouldShowDarkModeToggle = user && visiblePath.includes(location.pathname);
 
   // Lấy thông tin user + connections khi user thay đổi
   useEffect(() => {
@@ -141,22 +146,25 @@ const App = () => {
   return (
     <>
       <Toaster />
-      <Routes>
-        <Route path="/" element={!user ? <Login /> : <Layout />}>
-          <Route index element={<Feed />} />
-          <Route path="messages" element={<Message />} />
-          <Route path="messages/:userId" element={<ChatBox />} />
-          <Route path="connections" element={<Connections />} />
-          <Route path="notifications" element={<NotificationsFeed />} />
-          <Route path="discover" element={<Discover />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="profile/:profileId" element={<Profile />} />
-          <Route path="create-post" element={<CreatePost />} />
-          <Route path="setting" element={<Setting />} />
-          <Route path="comment-modal" element={<CommentModal />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
+      {shouldShowDarkModeToggle && <DarkModeToggle />}
+      <Suspense fallback={<div />}>
+        <Routes>
+          <Route path="/" element={!user ? <Login /> : <Layout />}>
+            <Route index element={<Feed />} />
+            <Route path="messages" element={<Message />} />
+            <Route path="messages/:userId" element={<ChatBox />} />
+            <Route path="connections" element={<Connections />} />
+            <Route path="notifications" element={<NotificationsFeed />} />
+            <Route path="discover" element={<Discover />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="profile/:profileId" element={<Profile />} />
+            <Route path="create-post" element={<CreatePost />} />
+            <Route path="setting" element={<Setting />} />
+            <Route path="comment-modal" element={<CommentModal />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </Suspense>
     </>
   );
 };

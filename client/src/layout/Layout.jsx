@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import SideBar from "../components/SideBar";
 import { Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { dummyUserData } from "../assets/assets";
 import Loading from "../components/Loading";
 import {useSelector} from 'react-redux'
 
@@ -13,7 +12,7 @@ const Layout = () => {
   return user ? (
     <div className="w-full flex h-screen">
       <SideBar sideBarOpen={sideBarOpen} setSideBarOpen={setSideBarOpen} />
-      <div className="flex-1 bg-slate-50">
+      <div className="flex-1 bg-slate-5 dark:bg-gray-900">
         <Outlet />
       </div>
       {sideBarOpen ? (

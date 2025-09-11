@@ -12,6 +12,9 @@ const Login = () => {
         src={assets.bgImage}
         alt="background"
         className="absolute top-0 left-0 w-full h-full object-cover opacity-30"
+        loading="lazy"
+        decoding="async"
+        fetchPriority="low"
       />
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/60 via-purple-800/60 to-indigo-900/70"></div>
 
@@ -27,6 +30,8 @@ const Login = () => {
           src={assets.logo}
           alt="logo"
           className="h-12 object-contain drop-shadow-lg"
+          loading="eager"
+          decoding="async"
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
@@ -40,7 +45,7 @@ const Login = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.6, duration: 0.6 }}
           >
-            <img src={assets.group_users} alt="" className="h-8 md:h-10" />
+            <img src={assets.group_users} alt="" className="h-8 md:h-10" loading="lazy" decoding="async" width={40} height={40} />
             <div>
               <div className="flex">
                 {Array(5)

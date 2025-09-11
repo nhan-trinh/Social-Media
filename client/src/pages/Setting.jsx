@@ -1,12 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Wrench} from "lucide-react";
+import { Wrench } from "lucide-react";
 
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 const Setting = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-gray-900 rounded-xl shadow p-1 max-w-md mx-auto">
       {/* Icon xoay */}
       <motion.div
         animate={{ rotate: 360 }}
@@ -21,7 +21,7 @@ const Setting = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
-        className="text-3xl font-bold text-gray-800 mb-2"
+        className="text-3xl font-bold text-gray-800 dark:text-white mb-2"
       >
         Settings đang phát triển
       </motion.h1>
@@ -36,12 +36,12 @@ const Setting = () => {
       </motion.p>
 
       {/* Nút quay lại */}
-        <Link
-          to="/"
-          className="inline-block px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow hover:bg-indigo-700 transition"
-        >
-          Go to Feed
-        </Link>
+      <Link
+        to="/"
+        className="inline-block px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow hover:bg-indigo-700 transition"
+      >
+        Go to Feed
+      </Link>
     </div>
   );
 };

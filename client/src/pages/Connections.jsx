@@ -7,7 +7,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useSelector , useDispatch} from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@clerk/clerk-react";
 import { fetchConnections } from "../features/connections/connectionSlice";
 import api from "../api/axios";
@@ -16,10 +16,12 @@ import toast from "react-hot-toast";
 const Connections = () => {
   const [currentTab, setCurrentTab] = useState("Followers");
   const navigate = useNavigate();
-  const {getToken} = useAuth();
-  const dispatch = useDispatch()
+  const { getToken } = useAuth();
+  const dispatch = useDispatch();
 
-  const {connections, pendingConnections, followers, following} = useSelector((state)=> state.connections)
+  const { connections, pendingConnections, followers, following } = useSelector(
+    (state) => state.connections
+  );
 
   const dataArray = [
     { label: "Followers", value: followers, icon: Users },
@@ -30,48 +32,56 @@ const Connections = () => {
 
   const handleUnfollow = async (userId) => {
     try {
-      const {data} = await api.post('/api/user/unfollow', {id: userId}, {
-        headers: {Authorization: `Bearer ${await getToken()}`}
-      })
-      if(data.success){
-        toast.success(data.message)
-        dispatch(fetchConnections(await getToken()))
-      }else{
-        toast(data.message)
+      const { data } = await api.post(
+        "/api/user/unfollow",
+        { id: userId },
+        {
+          headers: { Authorization: `Bearer ${await getToken()}` },
+        }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        dispatch(fetchConnections(await getToken()));
+      } else {
+        toast(data.message);
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.message);
     }
-  }
+  };
 
-    const acceptConnection = async (userId) => {
+  const acceptConnection = async (userId) => {
     try {
-      const {data} = await api.post('/api/user/accept', {id: userId}, {
-        headers: {Authorization: `Bearer ${await getToken()}`}
-      })
-      if(data.success){
-        toast.success(data.message)
-        dispatch(fetchConnections(await getToken()))
-      }else{
-        toast(data.message)
+      const { data } = await api.post(
+        "/api/user/accept",
+        { id: userId },
+        {
+          headers: { Authorization: `Bearer ${await getToken()}` },
+        }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        dispatch(fetchConnections(await getToken()));
+      } else {
+        toast(data.message);
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.message);
     }
-  }
+  };
 
-  useEffect(()=>{
-    getToken().then((token)=>{
-      dispatch(fetchConnections(token))
-    })
-  }, [])
+  useEffect(() => {
+    getToken().then((token) => {
+      dispatch(fetchConnections(token));
+    });
+  }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
       <div className="max-w-6xl max-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Friends</h1>
-          <p className="text-slate-600">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2 dark:text-white">Friends</h1>
+          <p className="text-slate-600 dark:text-gray-400">
             Manage your network and discover new connections
           </p>
         </div>
@@ -80,7 +90,7 @@ const Connections = () => {
           {dataArray.map((item, index) => (
             <div
               key={index}
-              className="flex flex-col items-center justify-center gap-1 border h-20 w-40 border-gray-200 bg-white shadow rounded-md"
+              className="flex flex-col items-center justify-center gap-1 border h-20 w-40 border-gray-200 dark:bg-primary-dark dark:border-primary-dark bg-white shadow rounded-md"
             >
               <b>{item.value.length}</b>
               <p className="text-slate-600">{item.label}</p>
@@ -88,7 +98,7 @@ const Connections = () => {
           ))}
         </div>
 
-        <div className="inline-flex flex-wrap items-center border border-gray-200 rounded-md p-1 bg-white shadow-sm">
+        <div className="inline-flex flex-wrap items-center border border-gray-200 dark:bg-primary-dark dark:border-primary-dark dark:hover-gray-400 rounded-md p-1 bg-white shadow-sm">
           {dataArray.map((tab) => (
             <button
               onClick={() => setCurrentTab(tab.label)}
@@ -116,17 +126,17 @@ const Connections = () => {
             .value.map((user) => (
               <div
                 key={user._id}
-                className="w-full max-w-88 flex gap-5 p-6 bg-white shadow rounded-md:"
+                className="w-full max-w-88 flex gap-5 p-6 dark:bg-primary-dark bg-white shadow rounded-md:"
               >
                 <img
                   src={user.profile_picture}
                   alt=""
-                  className="rounded-full w-12 h-12 shadow-md mx-auto"
+                  className="rounded-full w-12 h-12 shadow-md mx-auto ring ring-gray-100 dark:ring-gray-800"
                 />
                 <div className="flex-1">
-                  <p className="font-medium text-slate-700">{user.full_name}</p>
-                  <p className="text-slate-700">@{user.username}</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="font-medium text-slate-700 dark:text-white">{user.full_name}</p>
+                  <p className="text-slate-700 dark:text-gray-400">@{user.username}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     @{user.bio.slice(0, 30)}...
                   </p>
                   <div className="flex max-sm:flex-col gap-2 mt-4">
@@ -139,17 +149,26 @@ const Connections = () => {
                       </button>
                     }
                     {currentTab === "Following" && (
-                      <button onClick={()=> handleUnfollow(user._id)} className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer">
+                      <button
+                        onClick={() => handleUnfollow(user._id)}
+                        className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer"
+                      >
                         Unfollow
                       </button>
                     )}
                     {currentTab === "Pending" && (
-                      <button onClick={()=> acceptConnection(user._id)} className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer">
+                      <button
+                        onClick={() => acceptConnection(user._id)}
+                        className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer"
+                      >
                         Accept
                       </button>
                     )}
                     {currentTab === "Connections" && (
-                      <button onClick={()=> navigate(`/messages/${user._id}`)} className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-slate-800 active:scale-95 transition cursor-pointer flex items-center justify-center gap-1">
+                      <button
+                        onClick={() => navigate(`/messages/${user._id}`)}
+                        className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-slate-800 active:scale-95 transition cursor-pointer flex items-center justify-center gap-1"
+                      >
                         <MessageSquare className="w-4 h-4" />
                         Message
                       </button>
