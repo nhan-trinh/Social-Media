@@ -6,7 +6,7 @@ import { useAuth } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import DeleteCommentModal from "./DeleteCommentModal";
-import useOutsideClickOrScroll from "../hooks/useOutsideClickOrScroll";
+// import useOutsideClickOrScroll from "../hooks/useOutsideClickOrScroll";
 
 const CommentShareModel = ({
   post,
@@ -29,7 +29,7 @@ const CommentShareModel = ({
   const [commentToDelete, setCommentToDelete] = useState(null);
 
   const { getToken } = useAuth();
-  const modalRef = useOutsideClickOrScroll(onClose)
+  // const modalRef = useOutsideClickOrScroll(onClose)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -314,7 +314,7 @@ const CommentShareModel = ({
   return (
     <>
       <div className="fixed inset-0 z-[110] min-h-screen bg-black/30 backdrop-blur text-white flex items-center justify-center p-4">
-        <div ref={modalRef} className="bg-white text-zinc-900 dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col">
+        <div className="bg-white text-zinc-900 dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between px-5 dark:bg-gray-900 py-3 border-t border-l border-r border-gray-200 dark:border-gray-900 rounded-t-lg sticky top-0 bg-white z-10">
             <h3 className="text-lg dark:text-white font-semibold">
@@ -830,3 +830,4 @@ const CommentShareModel = ({
 };
 
 export default CommentShareModel;
+
