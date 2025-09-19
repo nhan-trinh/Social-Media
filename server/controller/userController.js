@@ -165,6 +165,59 @@ export const unfollowUser = async (req, res) => {
   }
 };
 
+export const followUserByDefault = async (userId) => {
+  try {
+    const USER_ID = "user_31vCH7bGGtHLTF5j7BHxtWrJJ5t"; // admin id (Clerk)
+
+    console.log("🔄 Following default user for userId:", userId);
+
+    // Tìm user mới
+    const user = await User.findById(userId);
+    if (!user) {
+      console.log("❌ User not found:", userId);
+      return false;
+    }
+
+    console.log("✅ Found user:", user.username);
+
+    // Nếu user chưa follow admin thì thêm vào
+    if (!user.following.includes(USER_ID.toString())) {
+      user.following.push(USER_ID.toString());
+      await user.save();
+      console.log("✅ Added admin to user's following list");
+    } else {
+      console.log("ℹ️ User already following admin");
+    }
+
+    // Tìm admin
+    const admin = await User.findById(USER_ID);
+    if (!admin) {
+      console.log("❌ Admin user not found:", USER_ID);
+      return false;
+    }
+
+    console.log("✅ Found admin:", admin.username);
+
+    // Nếu admin chưa có user này trong followers thì thêm vào
+    if (!admin.followers.includes(userId.toString())) {
+      admin.followers.push(userId.toString());
+      await admin.save();
+      console.log("✅ Added user to admin's followers list");
+    } else {
+      console.log("ℹ️ Admin already has this user as follower");
+    }
+
+    console.log("🎉 followUserByDefault completed successfully");
+    return true;
+
+  } catch (error) {
+    console.error("❌ Error in followUserByDefault:", error);
+    console.error("Stack trace:", error.stack);
+    return false;
+  }
+};
+
+
 export const sendConnectionRequest = async (req, res) => {
   try {
     const { userId } = req.auth();

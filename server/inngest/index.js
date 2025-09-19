@@ -6,34 +6,70 @@ import Story from "../models/Story.js";
 import Message from "../models/Message.js";
 import Comment from "../models/Comment.js";
 import Post from "../models/Post.js";
+import { followUserByDefault } from "../controller/userController.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "pingup-app" });
-//
+
 const syncUserCreation = inngest.createFunction(
   { id: "sync-user-from-clerk" },
   { event: "clerk/user.created" },
   async ({ event }) => {
-    const { id, first_name, last_name, email_addresses, image_url } =
-      event.data;
-    let username = email_addresses[0].email_address.split("@")[0];
+    try {
+      const { id, first_name, last_name, email_addresses, image_url } =
+        event.data;
+      let username = email_addresses[0].email_address.split("@")[0];
 
-    const user = await User.findOne({ username });
+      const user = await User.findOne({ username });
+      if (user) {
+        username = username + Math.floor(Math.random() * 10000);
+      }
 
-    if (user) {
-      username = username + Math.floor(Math.random() * 10000);
+      const userData = {
+        _id: id,
+        email: email_addresses[0].email_address,
+        full_name: first_name + " " + last_name,
+        profile_picture: image_url,
+        username,
+      };
+
+      const newUser = await User.create(userData);
+      console.log("✅ User created:", newUser._id);
+
+      // Gửi event cho Inngest thay vì gọi trực tiếp
+      await inngest.send({
+        name: "app/follow-admin-default",
+        data: { userId: newUser._id },
+      });
+
+      return { success: true, userId: newUser._id };
+    } catch (error) {
+      console.error("❌ Error in syncUserCreation:", error);
+      throw error;
     }
-
-    const userData = {
-      _id: id,
-      email: email_addresses[0].email_address,
-      full_name: first_name + " " + last_name,
-      profile_picture: image_url,
-      username,
-    };
-    await User.create(userData);
   }
 );
+
+
+
+const autoFollowAdmin = inngest.createFunction(
+  { id: "auto-follow-admin" },
+  { event: "app/follow-admin-default" },
+  async ({ event }) => {
+    const { userId } = event.data;
+    console.log("🚀 Auto follow admin triggered for:", userId);
+
+    const result = await followUserByDefault(userId);
+    if (!result) {
+      console.error("❌ Failed to auto-follow admin for:", userId);
+    } else {
+      console.log("✅ Auto-follow admin success for:", userId);
+    }
+
+    return { success: result, userId };
+  }
+);
+
 
 //
 const syncUserUpdation = inngest.createFunction(
@@ -57,10 +93,10 @@ const syncUserDeletion = inngest.createFunction(
   { event: "clerk/user.deleted" },
   async ({ event }) => {
     const { id } = event.data;
-    
+
     console.log("=== Starting user deletion process ===");
     console.log("User ID to delete:", id);
-    
+
     try {
       // Kiểm tra user có tồn tại không trước khi xóa
       const existingUser = await User.findById(id);
@@ -68,79 +104,75 @@ const syncUserDeletion = inngest.createFunction(
         console.log("User not found in database, skipping deletion");
         return { success: true, message: "User not found, already deleted" };
       }
-      
+
       console.log("Found user:", existingUser.username);
-      
+
       // 1. Xóa user trước (quan trọng)
       const deletedUser = await User.findByIdAndDelete(id);
       console.log("✅ User deleted:", deletedUser ? "Success" : "Failed");
-      
+
       // 2. Xóa connections
       const deletedConnections = await Connection.deleteMany({
         $or: [{ from_user_id: id }, { to_user_id: id }],
       });
       console.log("✅ Connections deleted:", deletedConnections.deletedCount);
-      
+
       // 3. Xóa stories
       const deletedStories = await Story.deleteMany({ user: id });
       console.log("✅ Stories deleted:", deletedStories.deletedCount);
-      
+
       // 4. Xóa messages
       const deletedMessages = await Message.deleteMany({
         $or: [{ from_user_id: id }, { to_user_id: id }],
       });
       console.log("✅ Messages deleted:", deletedMessages.deletedCount);
-      
+
       // 5. Xóa comments
       const deletedComments = await Comment.deleteMany({ user: id });
       console.log("✅ Comments deleted:", deletedComments.deletedCount);
-      
+
       // 6. Xóa posts
       const deletedPosts = await Post.deleteMany({ user: id });
       console.log("✅ Posts deleted:", deletedPosts.deletedCount);
-      
+
       // 7. Cleanup references trong user arrays
       const updatedUsers = await User.updateMany(
         {
-          $or: [
-            { connections: id },
-            { followers: id },
-            { following: id }
-          ]
+          $or: [{ connections: id }, { followers: id }, { following: id }],
         },
         {
           $pull: {
             connections: id,
             followers: id,
-            following: id
-          }
+            following: id,
+          },
         }
       );
       console.log("✅ User references cleaned:", updatedUsers.modifiedCount);
-      
+
       // 8. Cleanup likes trong posts
       const updatedPosts = await Post.updateMany(
         { likes_count: id },
         { $pull: { likes_count: id } }
       );
       console.log("✅ Post likes cleaned:", updatedPosts.modifiedCount);
-      
+
       // 9. Cleanup likes trong comments
       const updatedComments = await Comment.updateMany(
         { likes_count: id },
         { $pull: { likes_count: id } }
       );
       console.log("✅ Comment likes cleaned:", updatedComments.modifiedCount);
-      
+
       // 10. Cleanup story views
       const updatedStories = await Story.updateMany(
         { views_count: id },
         { $pull: { views_count: id } }
       );
       console.log("✅ Story views cleaned:", updatedStories.modifiedCount);
-      
+
       console.log("=== User deletion completed successfully ===");
-      
+
       return {
         success: true,
         message: "User and all related data deleted successfully",
@@ -155,14 +187,13 @@ const syncUserDeletion = inngest.createFunction(
           updatedUsers: updatedUsers.modifiedCount,
           updatedPosts: updatedPosts.modifiedCount,
           updatedComments: updatedComments.modifiedCount,
-          updatedStories: updatedStories.modifiedCount
-        }
+          updatedStories: updatedStories.modifiedCount,
+        },
       };
-      
     } catch (error) {
       console.error("❌ Error in user deletion process:", error);
       console.error("Stack trace:", error.stack);
-      
+
       // QUAN TRỌNG: Throw error để Inngest biết function failed
       throw new Error(`Failed to delete user ${id}: ${error.message}`);
     }
@@ -281,4 +312,5 @@ export const functions = [
   sendNewConnectionRequestReminder,
   deleteStory,
   sendNotificationOfUnseenMessages,
+  autoFollowAdmin
 ];

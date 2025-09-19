@@ -69,7 +69,10 @@ export const addSharePost = async (req, res) => {
 
 export const getSharedPosts = async (req, res) => {
   try {
-    const shares = await Share.find()
+    const { userId } = req.auth();
+    const user = await User.findOne({ _id: userId });
+    const userIds = [userId, ...user.connections, ...user.following];
+    const shares = await Share.find({ user: { $in: userIds } })
       .populate("user")
       .populate({
         path: "shared_post",
@@ -79,24 +82,30 @@ export const getSharedPosts = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    const formattedShares = shares.map(share => {
+    const formattedShares = shares.map((share) => {
       // Nếu shared_post bị xóa hoặc không tồn tại
       if (!share.shared_post || share.shared_post_deleted) {
         return {
           ...share.toObject(),
           shared_post: {
             deleted: true,
-            message: share.deleted_message || "Content isn't available right now"
-          }
+            message:
+              share.deleted_message || "Content isn't available right now",
+          },
         };
       }
       return share.toObject();
     });
 
     const postsWithCommentCount = await Promise.all(
-      formattedShares.map(async (share) => { 
-        if (share.comments_count === undefined || share.comments_count === null) {
-          const commentCount = await Comment.countDocuments({ post: share._id });
+      formattedShares.map(async (share) => {
+        if (
+          share.comments_count === undefined ||
+          share.comments_count === null
+        ) {
+          const commentCount = await Comment.countDocuments({
+            post: share._id,
+          });
           await Share.findByIdAndUpdate(share._id, {
             comments_count: commentCount,
           });
@@ -124,7 +133,7 @@ export const likeSharePost = async (req, res) => {
       share.likes_count = share.likes_count.filter((user) => user !== userId);
       await share.save();
       res.json({ success: true, message: "Post unliked" });
-    } else { 
+    } else {
       share.likes_count.push(userId);
       await share.save();
       res.json({ success: true, message: "Post liked" });
@@ -217,21 +226,26 @@ export const getUserShares = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    const formattedShares = shares.map(share => {
+    const formattedShares = shares.map((share) => {
       // Nếu shared_post bị xóa hoặc không tồn tại
       if (!share.shared_post || share.shared_post_deleted) {
         return {
           ...share.toObject(),
           shared_post: {
             deleted: true,
-            message: share.deleted_message || "Content isn't available right now"
-          }
+            message:
+              share.deleted_message || "Content isn't available right now",
+          },
         };
       }
       return share.toObject();
     });
-    
-    res.json({ success: true, shares: formattedShares, count: formattedShares.length });
+
+    res.json({
+      success: true,
+      shares: formattedShares,
+      count: formattedShares.length,
+    });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
